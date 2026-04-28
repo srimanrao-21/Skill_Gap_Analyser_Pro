@@ -246,24 +246,27 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
-const server = app.listen(PORT, () => {
-  console.log(`🚀 Backend running at http://localhost:${PORT}`);
-  // Keep-alive heartbeat
-  setInterval(() => {
-    if (server.listening) {
-      // console.log('[Heartbeat] Server is still listening...');
-    } else {
-      console.error('[Heartbeat] Server stopped listening!');
-    }
-  }, 10000);
-});
+// For Vercel/Serverless deployment
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  const server = app.listen(PORT, () => {
+    console.log(`🚀 Backend running at http://localhost:${PORT}`);
+    // Keep-alive heartbeat
+    setInterval(() => {
+      if (server.listening) {
+        // console.log('[Heartbeat] Server is still listening...');
+      } else {
+        console.error('[Heartbeat] Server stopped listening!');
+      }
+    }, 10000);
+  });
 
-server.on('error', (err) => {
-  console.error('[Server Error] Fatal error occurred:', err);
-  if (err.code === 'EADDRINUSE') {
-    console.error(`[Server Error] Port ${PORT} is already in use. Please kill the process on this port.`);
-  }
-});
+  server.on('error', (err) => {
+    console.error('[Server Error] Fatal error occurred:', err);
+    if (err.code === 'EADDRINUSE') {
+      console.error(`[Server Error] Port ${PORT} is already in use. Please kill the process on this port.`);
+    }
+  });
+}
 
 process.on('uncaughtException', (err) => {
   console.error('[Process Error] Uncaught Exception:', err);
@@ -272,3 +275,5 @@ process.on('uncaughtException', (err) => {
 process.on('unhandledRejection', (reason, promise) => {
   console.error('[Process Error] Unhandled Rejection at:', promise, 'reason:', reason);
 });
+
+module.exports = app;

@@ -31,7 +31,7 @@ const generateStats = async (username: string, platform: string) => {
   // Real data fetching from our backend
   if (platform === "leetcode" || platform === "hackerrank") {
     try {
-      const res = await fetch(`http://localhost:5005/api/${platform}/${username}`);
+      const res = await fetch(`/api/${platform}/${username}`);
       if (!res.ok) {
         const err = await res.json().catch(() => ({ error: "Failed to fetch" }));
         throw new Error(err.error || `Failed to fetch ${platform} stats`);
