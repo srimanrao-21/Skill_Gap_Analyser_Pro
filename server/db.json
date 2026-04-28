@@ -1,0 +1,213 @@
+{
+  "profile": {
+    "name": "Naina",
+    "email": "srimanrao1309@gmail.com",
+    "college": "",
+    "year": "",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=naina",
+    "targetRole": "Mobile Developer",
+    "skills": [
+      {
+        "skill": "Flutter",
+        "level": "Intermediate"
+      },
+      {
+        "skill": "Kotlin",
+        "level": "Intermediate"
+      },
+      {
+        "skill": "Swift",
+        "level": "Intermediate"
+      },
+      {
+        "skill": "Git",
+        "level": "Advanced"
+      },
+      {
+        "skill": "REST APIs",
+        "level": "Advanced"
+      },
+      {
+        "skill": "JavaScript",
+        "level": "Advanced"
+      }
+    ]
+  },
+  "moduleProgress": [],
+  "codingStats": [
+    {
+      "platform": "leetcode",
+      "username": "nikhil",
+      "easy": 158,
+      "medium": 95,
+      "hard": 7,
+      "contestRating": 1804,
+      "streakDays": 57,
+      "weeklyActivity": [
+        5,
+        7,
+        15,
+        7,
+        10,
+        11,
+        1
+      ],
+      "realName": "Nikhil",
+      "userAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=nikhil",
+      "total": 260
+    },
+    {
+      "platform": "hackerrank",
+      "username": "rahul",
+      "easy": 204,
+      "medium": 49,
+      "hard": 27,
+      "contestRating": 1671,
+      "streakDays": 23,
+      "weeklyActivity": [
+        4,
+        14,
+        5,
+        2,
+        11,
+        3,
+        6
+      ],
+      "realName": "Rahul",
+      "userAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=rahul",
+      "total": 280
+    },
+    {
+      "platform": "codeforces",
+      "username": "kahania",
+      "easy": 72,
+      "medium": 10,
+      "hard": 10,
+      "contestRating": 1760,
+      "streakDays": 56,
+      "weeklyActivity": [
+        10,
+        13,
+        0,
+        8,
+        5,
+        1,
+        11
+      ],
+      "realName": "Kahania",
+      "userAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=kahania",
+      "total": 92
+    },
+    {
+      "platform": "gfg",
+      "username": "naina",
+      "easy": 64,
+      "medium": 84,
+      "hard": 37,
+      "contestRating": 1699,
+      "streakDays": 39,
+      "weeklyActivity": [
+        3,
+        15,
+        14,
+        10,
+        13,
+        9,
+        4
+      ],
+      "realName": "Naina",
+      "userAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=naina",
+      "total": 185
+    }
+  ],
+  "companies": [
+    {
+      "name": "TCS",
+      "logo": "💠",
+      "type": "Top MNC",
+      "minScore": 75,
+      "description": "India's largest IT company. Great for freshers.",
+      "url": "https://www.tcs.com/careers",
+      "roles": [
+        "Software Engineer",
+        "Systems Engineer"
+      ],
+      "color": "from-blue-600 to-indigo-800"
+    },
+    {
+      "name": "Infosys",
+      "logo": "🔷",
+      "type": "Top MNC",
+      "minScore": 70,
+      "description": "Global IT company with excellent training.",
+      "url": "https://www.infosys.com/careers",
+      "roles": [
+        "Systems Engineer",
+        "Associate"
+      ],
+      "color": "from-blue-500 to-cyan-700"
+    },
+    {
+      "name": "Wipro",
+      "logo": "☸️",
+      "type": "Top MNC",
+      "minScore": 70,
+      "description": "IT services company with diverse project opportunities.",
+      "url": "https://careers.wipro.com",
+      "roles": [
+        "Project Engineer",
+        "Associate"
+      ],
+      "color": "from-purple-600 to-indigo-700"
+    },
+    {
+      "name": "Zoho",
+      "logo": "🇿️",
+      "type": "Product",
+      "minScore": 60,
+      "description": "Leading SaaS product company.",
+      "url": "https://jobs.zoho.com",
+      "roles": [
+        "Software Developer",
+        "Project Lead"
+      ],
+      "color": "from-red-500 to-yellow-500"
+    },
+    {
+      "name": "Google",
+      "logo": "🔍",
+      "type": "FAANG",
+      "minScore": 90,
+      "description": "Top-tier tech giant.",
+      "url": "https://google.com/careers",
+      "roles": [
+        "SDE I",
+        "Data Scientist"
+      ],
+      "color": "from-blue-500 via-red-500 to-yellow-500"
+    },
+    {
+      "name": "Microsoft",
+      "logo": "🪟",
+      "type": "FAANG",
+      "minScore": 88,
+      "description": "Leading cloud and software provider.",
+      "url": "https://microsoft.com/careers",
+      "roles": [
+        "Software Engineer",
+        "Cloud Solutions"
+      ],
+      "color": "from-blue-600 to-blue-400"
+    }
+  ],
+  "chatMessages": [
+    {
+      "role": "user",
+      "content": "Top interview questions"
+    },
+    {
+      "role": "assistant",
+      "content": "**Interview Preparation Strategy for nikhil:**\n\n**General preparation:**\n1. DSA & Problem Solving\n2. Core CS subjects\n3. Projects & practical experience\n4. Communication skills\n\n**Timeline:** Start 3-4 months before placement season.\n\nWant me to dive deeper into any particular round? (Technical / HR / Behavioral / System Design)"
+    }
+  ]
+}
