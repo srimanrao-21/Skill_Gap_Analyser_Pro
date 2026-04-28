@@ -1,7 +1,19 @@
 // server/aiMentor.js — Comprehensive context-aware AI Placement Mentor engine.
-// This module provides intelligent, topic-aware responses without requiring
-// an external LLM API. It uses keyword extraction, intent classification,
-// conversation history analysis, and a deep knowledge base.
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+require('dotenv').config();
+
+// Initialize Gemini API
+console.log("[AI Mentor] Checking for GEMINI_API_KEY...");
+const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
+
+if (genAI) {
+  console.log("[AI Mentor] Gemini API initialized successfully.");
+} else {
+  console.warn("[AI Mentor] GEMINI_API_KEY not found in environment variables.");
+}
+
+// This module provides intelligent, topic-aware responses.
+// It uses Gemini AI when available, with a rule-based fallback.
 
 // ─── Knowledge Base ───────────────────────────────────────────────────
 const KNOWLEDGE = {
@@ -181,6 +193,7 @@ function classifyIntent(message) {
 
   // Time management / Study plan
   if (/\b(time\s*manag|study\s*plan|schedule|routine|how\s*many\s*hours|daily\s*plan|weekly\s*plan)/i.test(msg)) return 'study_plan';
+  if (/\b(what\s*time|current\s*time|the\s*time)\b/i.test(msg)) return 'general';
 
   // CS Fundamentals
   if (/\b(oop|oops|object\s*orient|encapsulat|abstraction|inherit|polymorph|solid\s*principle|design\s*principle|class\s*and\s*object)/i.test(msg)) return 'cs_oop';
@@ -205,6 +218,7 @@ function classifyIntent(message) {
 
   // General Study
   if (/\b(time\s*complex|space\s*complex|big\s*o|O\(n|O\(1|O\(log|complex\s*analy)/i.test(msg)) return 'study_complexity';
+  if (/\b(complexity)\b/i.test(msg)) return 'study_complexity';
   if (/\b(design\s*pattern|singleton|factory|observer|strategy|mvc|builder\s*pattern|decorator\s*pattern)/i.test(msg)) return 'study_design_patterns';
   if (/\b(agile|scrum|sprint|standup|kanban|waterfall|methodology|jira|retrospective)/i.test(msg)) return 'study_agile';
   if (/\b(open\s*source|contribute|contribution|pull\s*request|first\s*issue|github\s*profile)/i.test(msg)) return 'study_open_source';
@@ -213,8 +227,8 @@ function classifyIntent(message) {
   return 'general';
 }
 
-// ─── Response Generator ───────────────────────────────────────────────
-function generateResponse(message, profile, conversationHistory) {
+// ─── Rule-Based Fallback Generator ───────────────────────────────────
+function generateFallbackResponse(message, profile, conversationHistory) {
   const intent = classifyIntent(message);
   const name = profile?.name || 'there';
   const role = profile?.targetRole || 'a tech career';
@@ -380,6 +394,59 @@ function generateResponse(message, profile, conversationHistory) {
       return `That's a great question, ${name}! Let me help you with that.\n\nBased on your profile${skills.length > 0 ? ` (skilled in ${skills.slice(0, 3).join(', ')})` : ''} and your target of ${role}, here are some things I can help you with right now:\n\n🔹 **\"How should I prepare for interviews?\"** — I'll give you a complete strategy\n🔹 **\"Tell me about arrays/DP/graphs\"** — Deep dive into any DSA topic\n🔹 **\"How to improve my resume?\"** — ATS-friendly resume tips\n🔹 **\"Tell me about TCS/Google/Amazon\"** — Company-specific prep guide\n🔹 **\"React vs Vue\"** or any tech comparison\n🔹 **\"I'm feeling stuck\"** — Motivation and study plans\n🔹 **\"Give me a study plan\"** — Structured daily schedule\n\nJust ask me anything specific and I'll give you detailed, actionable advice! 🚀`;
     }
   }
+}
+
+// ─── Response Generator ───────────────────────────────────────────────
+async function generateResponse(message, profile, conversationHistory) {
+  const name = profile?.name || 'there';
+  const role = profile?.targetRole || 'a tech career';
+  const skills = profile?.skills?.map(s => s.skill) || [];
+
+  // 1. Try Gemini AI first if configured
+  if (genAI) {
+    const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-pro"];
+
+    for (const modelName of modelsToTry) {
+      try {
+        console.log(`[AI Mentor] Attempting Gemini (${modelName}) for user: ${name}`);
+        const model = genAI.getGenerativeModel({ model: modelName });
+
+        const systemContext = `You are a professional AI Placement Mentor for "Skill Bridge Pro". 
+        User Profile: Name: ${name}, Target Role: ${role}, Skills: ${skills.join(', ')}.
+        Your goal is to provide expert career advice, DSA guidance, and interview tips. 
+        Be encouraging, professional, and use markdown for formatting. 
+        Keep responses concise but thorough.`;
+
+        const history = conversationHistory.map(msg => ({
+          role: msg.role === 'user' ? 'user' : 'model',
+          parts: [{ text: msg.content }],
+        }));
+
+        const chat = model.startChat({
+          history: history,
+          generationConfig: { maxOutputTokens: 1000 },
+        });
+
+        const result = await chat.sendMessage(`${systemContext}\n\nUser Question: ${message}`);
+        const response = await result.response;
+        const text = response.text();
+
+        if (text) {
+          console.log(`[AI Mentor] Gemini (${modelName}) response successful.`);
+          return text;
+        }
+      } catch (error) {
+        console.error(`[AI Mentor] Gemini (${modelName}) error:`, error.message || error);
+        // Continue to next model
+      }
+    }
+    console.warn("[AI Mentor] All Gemini models failed, falling back to rule-based system.");
+  } else {
+    console.log("[AI Mentor] Gemini client not initialized (check GEMINI_API_KEY), using rule-based fallback.");
+  }
+
+  // 2. Fallback to rule-based system
+  return generateFallbackResponse(message, profile, conversationHistory);
 }
 
 module.exports = { generateResponse, classifyIntent };

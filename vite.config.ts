@@ -22,7 +22,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api\/hackerrank/, '')
       },
       '/api': {
-        target: 'http://localhost:5001',
+        target: 'http://localhost:5005',
         changeOrigin: true
       }
     }

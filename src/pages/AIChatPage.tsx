@@ -33,19 +33,26 @@ export default function AIChatPage() {
     // Call backend for AI response
     setIsTyping(true);
     try {
+      console.log("[AIChat] Sending request to /api/chat", { message: userMsg, profile, historyCount: chatMessages.length });
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userMsg, profile, history: chatMessages }),
       });
       
+      console.log("[AIChat] Response status:", response.status);
+
       if (response.ok) {
         const data = await response.json();
+        console.log("[AIChat] Received data:", data);
         addChatMessage(data);
       } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("[AIChat] Backend error details:", errorData);
         throw new Error("Backend response error");
       }
     } catch (e) {
+      console.error("[AIChat] Fetch failed:", e);
       console.warn("Backend not available, using fallback", e);
       // Intelligent fallback when backend is down
       setTimeout(() => {

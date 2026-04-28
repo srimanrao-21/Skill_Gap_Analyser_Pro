@@ -5,11 +5,18 @@ const path = require('path');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5005;
 const DB_FILE = path.join(__dirname, 'db.json');
 
 app.use(cors());
 app.use(express.json());
+
+// Debug logging middleware
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  if (req.method === 'POST') console.log('Body:', JSON.stringify(req.body).substring(0, 200) + '...');
+  next();
+});
 
 // Initial Data Structure
 const initialData = {
@@ -57,43 +64,76 @@ app.get('/api/leetcode/:username', async (req, res) => {
   try {
     const { username } = req.params;
 
-    // Fetch solved stats
-    const solvedRes = await fetch(`https://alfa-leetcode-api.onrender.com/${username}/solved`, {
-      headers: { 'Accept': 'application/json' }
-    });
-    const solvedData = await solvedRes.json();
+    const query = `
+      query getUserProfile($username: String!) {
+        matchedUser(username: $username) {
+          username
+          profile {
+            realName
+            userAvatar
+            ranking
+            reputation
+          }
+          submitStats: submitStatsGlobal {
+            acSubmissionNum {
+              difficulty
+              count
+            }
+          }
+        }
+        allQuestionsCount {
+          difficulty
+          count
+        }
+      }
+    `;
 
-    // Check if user was found
-    if (!solvedData || solvedData.errors || solvedData.matchedUser === null) {
-      return res.status(404).json({ error: `LeetCode user "${username}" not found. Please check your username.` });
+    const lcRes = await fetch("https://leetcode.com/graphql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Referer": "https://leetcode.com"
+      },
+      body: JSON.stringify({
+        query,
+        variables: { username }
+      })
+    });
+
+    const data = await lcRes.json();
+
+    if (!data.data || !data.data.matchedUser) {
+      return res.status(404).json({ error: `LeetCode user "${username}" not found.` });
     }
 
-    const easy   = solvedData.easySolved   || 0;
-    const medium = solvedData.mediumSolved || 0;
-    const hard   = solvedData.hardSolved   || 0;
+    const stats = data.data.matchedUser.submitStats.acSubmissionNum;
 
-    // Fetch contest rating separately
-    let contestRating = 0;
-    try {
-      const contestRes = await fetch(`https://alfa-leetcode-api.onrender.com/${username}/contest`, {
-        headers: { 'Accept': 'application/json' }
-      });
-      const contestData = await contestRes.json();
-      contestRating = contestData?.contestRating ? Math.round(contestData.contestRating) : 0;
-    } catch (_) { /* contest data optional */ }
+    let easy = 0;
+    let medium = 0;
+    let hard = 0;
+
+    stats.forEach(item => {
+      if (item.difficulty === "Easy") easy = item.count;
+      if (item.difficulty === "Medium") medium = item.count;
+      if (item.difficulty === "Hard") hard = item.count;
+    });
+
+    // Optional: Fetch contest rating if possible, or just use ranking as a proxy/placeholder
+    const ranking = data.data.matchedUser.profile.ranking || 0;
 
     res.json({
       easy,
       medium,
       hard,
-      contestRating,
-      streakDays: 1 + (username.length * 5) % 30,
-      weeklyActivity: Array.from({ length: 7 }, (_, i) => Math.max(0, (easy + medium + hard) > 0 ? Math.floor(((easy + medium + hard) / 7) * Math.random() * 2) : (username.length * (i + 3)) % 10)
+      ranking,
+      streakDays: 1 + (username.length * 5) % 30, // Keeping randomized streak for demo
+      weeklyActivity: Array.from({ length: 7 }, (_, i) =>
+        Math.max(0, (easy + medium + hard) > 0 ? Math.floor(((easy + medium + hard) / 7) * Math.random() * 2) : (username.length * (i + 3)) % 10)
       )
     });
   } catch (error) {
     console.error('LeetCode fetch error:', error);
-    res.status(500).json({ error: "Failed to connect to LeetCode API. Please try again." });
+    res.status(500).json({ error: "Failed to fetch LeetCode data. Please try again." });
   }
 });
 
@@ -132,8 +172,8 @@ app.get('/api/hackerrank/:username', async (req, res) => {
 
     // Extract real name and avatar from meta tags
     const realName = $('meta[property="og:title"]').attr('content') ||
-                     $('h1').first().text().trim() ||
-                     username;
+      $('h1').first().text().trim() ||
+      username;
 
     const userAvatar = $('meta[property="og:image"]').attr('content') || '';
 
@@ -151,9 +191,9 @@ app.get('/api/hackerrank/:username', async (req, res) => {
 
     // Derive problem counts from score and badges
     const base = score > 0 ? score : (badgeCount * 15 + username.length * 3 + 10);
-    const easy   = Math.max(5,  Math.floor(base * 0.5));
-    const medium  = Math.max(2,  Math.floor(base * 0.3));
-    const hard    = Math.max(0,  Math.floor(base * 0.1));
+    const easy = Math.max(5, Math.floor(base * 0.5));
+    const medium = Math.max(2, Math.floor(base * 0.3));
+    const hard = Math.max(0, Math.floor(base * 0.1));
     const contestRating = 1200 + Math.min(800, base * 2 + followers);
 
     res.json({
@@ -189,7 +229,7 @@ app.post('/api/save', (req, res) => {
 // AI Chat Endpoint — powered by comprehensive AI Mentor engine
 const { generateResponse } = require('./aiMentor');
 
-app.post('/api/chat', (req, res) => {
+app.post('/api/chat', async (req, res) => {
   const { message, profile, history } = req.body;
 
   if (!message || typeof message !== 'string') {
@@ -197,9 +237,38 @@ app.post('/api/chat', (req, res) => {
   }
 
   const conversationHistory = Array.isArray(history) ? history : [];
-  const response = generateResponse(message, profile, conversationHistory);
-
-  res.json({ role: 'assistant', content: response });
+  try {
+    const response = await generateResponse(message, profile, conversationHistory);
+    res.json({ role: 'assistant', content: response });
+  } catch (error) {
+    console.error('AI Chat error:', error);
+    res.status(500).json({ role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' });
+  }
 });
 
-app.listen(PORT, () => console.log(`🚀 Backend running at http://localhost:${PORT}`));
+const server = app.listen(PORT, () => {
+  console.log(`🚀 Backend running at http://localhost:${PORT}`);
+  // Keep-alive heartbeat
+  setInterval(() => {
+    if (server.listening) {
+      // console.log('[Heartbeat] Server is still listening...');
+    } else {
+      console.error('[Heartbeat] Server stopped listening!');
+    }
+  }, 10000);
+});
+
+server.on('error', (err) => {
+  console.error('[Server Error] Fatal error occurred:', err);
+  if (err.code === 'EADDRINUSE') {
+    console.error(`[Server Error] Port ${PORT} is already in use. Please kill the process on this port.`);
+  }
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('[Process Error] Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[Process Error] Unhandled Rejection at:', promise, 'reason:', reason);
+});

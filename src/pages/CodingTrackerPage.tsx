@@ -28,43 +28,34 @@ const PLATFORMS: Platform[] = [
 
 // Stats generation and backend API fetch
 const generateStats = async (username: string, platform: string) => {
-  // Simulate network delay for a realistic "syncing" feel
-  await new Promise(resolve => setTimeout(resolve, 800));
-
-  // Generate randomized stats as requested by the user
-  const getRandom = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
-  
-  // Platform-specific ranges for realistic-looking data
-  let easy, medium, hard, contestRating;
-  
-  if (platform === "leetcode") {
-    easy = getRandom(40, 250);
-    medium = getRandom(20, 150);
-    hard = getRandom(5, 60);
-    contestRating = getRandom(1400, 2800);
-  } else if (platform === "hackerrank") {
-    easy = getRandom(80, 350);
-    medium = getRandom(40, 200);
-    hard = getRandom(10, 80);
-    contestRating = getRandom(1200, 2400);
-  } else {
-    // Other platforms (CodeChef, Codeforces, GFG)
-    easy = getRandom(20, 120);
-    medium = getRandom(10, 90);
-    hard = getRandom(2, 40);
-    contestRating = getRandom(1100, 2000);
+  // Real data fetching from our backend
+  if (platform === "leetcode" || platform === "hackerrank") {
+    try {
+      const res = await fetch(`http://localhost:5005/api/${platform}/${username}`);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Failed to fetch" }));
+        throw new Error(err.error || `Failed to fetch ${platform} stats`);
+      }
+      
+      const data = await res.json();
+      return {
+        easy: data.easy || 0,
+        medium: data.medium || 0,
+        hard: data.hard || 0,
+        contestRating: data.contestRating || data.ranking || 0,
+        streakDays: data.streakDays || 0,
+        weeklyActivity: data.weeklyActivity || Array.from({ length: 7 }, () => 0),
+        realName: data.realName || username,
+        userAvatar: data.userAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`
+      };
+    } catch (error: any) {
+      console.error(`Error fetching ${platform} stats:`, error);
+      throw new Error(error.message || `Could not connect to backend for ${platform} sync`);
+    }
   }
 
-  return {
-    easy,
-    medium,
-    hard,
-    contestRating,
-    streakDays: getRandom(1, 60),
-    weeklyActivity: Array.from({ length: 7 }, () => getRandom(0, 15)),
-    realName: username.charAt(0).toUpperCase() + username.slice(1),
-    userAvatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`
-  };
+  // If platform not supported for real sync
+  throw new Error(`Real-time sync for ${platform} is coming soon! Please use LeetCode or HackerRank for now.`);
 };
 
 function MiniBarChart({ data, label }: { data: number[]; label: string }) {
@@ -173,11 +164,14 @@ export default function CodingTrackerPage() {
     }
   };
 
-  const totalSolved = codingStats.reduce((acc, s) => acc + s.total, 0);
-  const totalEasy = codingStats.reduce((acc, s) => acc + s.easy, 0);
-  const totalMedium = codingStats.reduce((acc, s) => acc + s.medium, 0);
-  const totalHard = codingStats.reduce((acc, s) => acc + s.hard, 0);
-  const codingReadiness = Math.min(100, Math.round((totalSolved / 300) * 100));
+  // Filter stats to only show the selected platform
+  const currentStat = codingStats.find(s => s.platform === selectedPlatform.id);
+
+  const totalSolved = currentStat ? currentStat.total : 0;
+  const totalEasy = currentStat ? currentStat.easy : 0;
+  const totalMedium = currentStat ? currentStat.medium : 0;
+  const totalHard = currentStat ? currentStat.hard : 0;
+  const codingReadiness = Math.min(100, Math.round((totalSolved / 200) * 100));
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6 animate-fade-in">
@@ -218,11 +212,11 @@ export default function CodingTrackerPage() {
         <p className="text-xs text-muted-foreground mt-2">Enter your username to simulate data sync (demo mode)</p>
       </div>
 
-      {codingStats.length === 0 ? (
+      {!currentStat ? (
         <div className="glass-card rounded-2xl p-12 text-center">
           <Code2 className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
-          <h3 className="font-display font-semibold text-muted-foreground">No platforms synced yet</h3>
-          <p className="text-sm text-muted-foreground mt-1">Add your coding platform profiles above</p>
+          <h3 className="font-display font-semibold text-muted-foreground">Platform not synced</h3>
+          <p className="text-sm text-muted-foreground mt-1">Please sync your {selectedPlatform.name} profile to see statistics</p>
         </div>
       ) : (
         <>
@@ -256,44 +250,54 @@ export default function CodingTrackerPage() {
             </div>
           </div>
 
-          {/* Per platform stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {codingStats.map((stat) => {
-              const platform = PLATFORMS.find((p) => p.id === stat.platform);
-              return (
-                <div key={stat.platform} className="glass-card rounded-2xl p-5 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${platform?.color} flex items-center justify-center text-xl shadow-md`}>
-                        {platform?.icon}
+          {/* Per platform stats (Only showing selected) */}
+          <div className="grid grid-cols-1 gap-4">
+            {codingStats
+              .filter((s) => s.platform === selectedPlatform.id)
+              .map((stat) => {
+                const platform = PLATFORMS.find((p) => p.id === stat.platform);
+                return (
+                  <div key={stat.platform} className="glass-card rounded-2xl p-6 space-y-4 border-2 border-brand-blue/20">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${platform?.color} flex items-center justify-center text-2xl shadow-md`}>
+                          {platform?.icon}
+                        </div>
+                        <div>
+                          <h3 className="font-display font-bold text-lg">{platform?.name} Overview</h3>
+                          <p className="text-xs text-muted-foreground font-mono">@{stat.username}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-display font-semibold">{platform?.name}</h3>
-                        <p className="text-xs text-muted-foreground">@{stat.username}</p>
+                      <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-600">
+                        <Flame className="w-4 h-4" />
+                        <span className="text-sm font-bold">{stat.streakDays} Day Streak</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1.5 text-orange-500">
-                      <Flame className="w-4 h-4" />
-                      <span className="text-sm font-bold">{stat.streakDays}d</span>
+
+                    <div className="grid grid-cols-2 gap-4 py-4 border-y border-border/40">
+                      <div className="text-center">
+                        <div className="text-3xl font-display font-bold text-brand-blue">{stat.total}</div>
+                        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Solved</div>
+                      </div>
+                      <div className="text-center border-l border-border/40">
+                        <div className="text-3xl font-display font-bold text-brand-purple">{stat.contestRating}</div>
+                        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Platform Rating</div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-bold">Difficulty Breakdown</h4>
+                        <DifficultyBar easy={stat.easy} medium={stat.medium} hard={stat.hard} />
+                      </div>
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-bold">Activity Pulse</h4>
+                        <MiniBarChart data={stat.weeklyActivity} label="Solutions over last 7 days" />
+                      </div>
                     </div>
                   </div>
-
-                  <div className="flex gap-4 text-center">
-                    <div className="flex-1">
-                      <div className="text-xl font-display font-bold text-brand-blue">{stat.total}</div>
-                      <div className="text-xs text-muted-foreground">Solved</div>
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-xl font-display font-bold text-brand-purple">{stat.contestRating}</div>
-                      <div className="text-xs text-muted-foreground">Rating</div>
-                    </div>
-                  </div>
-
-                  <DifficultyBar easy={stat.easy} medium={stat.medium} hard={stat.hard} />
-                  <MiniBarChart data={stat.weeklyActivity} label="Weekly Activity" />
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
 
           {/* Platform analysis */}

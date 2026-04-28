@@ -1,10 +1,10 @@
 {
   "profile": {
-    "name": "Naina",
+    "name": "sriman25",
     "email": "srimanrao1309@gmail.com",
     "college": "",
     "year": "",
-    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=naina",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=sriman25",
     "targetRole": "Mobile Developer",
     "skills": [
       {
@@ -37,24 +37,24 @@
   "codingStats": [
     {
       "platform": "leetcode",
-      "username": "nikhil",
-      "easy": 158,
-      "medium": 95,
-      "hard": 7,
-      "contestRating": 1804,
-      "streakDays": 57,
+      "username": "sriman25",
+      "easy": 10,
+      "medium": 9,
+      "hard": 0,
+      "contestRating": 4209936,
+      "streakDays": 11,
       "weeklyActivity": [
+        3,
+        0,
+        4,
+        2,
+        0,
         5,
-        7,
-        15,
-        7,
-        10,
-        11,
-        1
+        2
       ],
-      "realName": "Nikhil",
-      "userAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=nikhil",
-      "total": 260
+      "realName": "sriman25",
+      "userAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=sriman25",
+      "total": 19
     },
     {
       "platform": "hackerrank",
@@ -208,6 +208,46 @@
     {
       "role": "assistant",
       "content": "**Interview Preparation Strategy for nikhil:**\n\n**General preparation:**\n1. DSA & Problem Solving\n2. Core CS subjects\n3. Projects & practical experience\n4. Communication skills\n\n**Timeline:** Start 3-4 months before placement season.\n\nWant me to dive deeper into any particular round? (Technical / HR / Behavioral / System Design)"
+    },
+    {
+      "role": "user",
+      "content": "hello"
+    },
+    {
+      "role": "assistant",
+      "content": "Hey srimanrao1309! Welcome back. What would you like to discuss? I can help with DSA, interview prep, resume tips, or career guidance for Mobile Developer. 🚀"
+    },
+    {
+      "role": "user",
+      "content": "hello"
+    },
+    {
+      "role": "assistant",
+      "content": "Hey srimanrao1309! Welcome back. What would you like to discuss? I can help with DSA, interview prep, resume tips, or career guidance for Mobile Developer. 🚀"
+    },
+    {
+      "role": "user",
+      "content": "hello"
+    },
+    {
+      "role": "assistant",
+      "content": "Hello srimanrao1309! 👋\n\nWelcome back to Skill Bridge Pro! I'm here to help you excel in your journey towards becoming a Mobile Developer.\n\nWith your skills in **Flutter, Kotlin, Swift, Git, REST APIs, and JavaScript**, we can focus on:\n\n*   **DSA Guidance:** Sharpening your problem-solving for mobile development roles.\n*   **Interview Preparation:** Crafting strong answers and tackling technical rounds.\n*   **Career Advice:** Navigating job searches and optimizing your profile.\n\n**What's on your mind today? How can I assist you right now?** Let's get started!"
+    },
+    {
+      "role": "user",
+      "content": "what is the time"
+    },
+    {
+      "role": "assistant",
+      "content": "Hello srimanrao1309! 👋\n\nAs an AI, I don't have access to real-time information like the current time or your specific location's time zone. You can usually check the time on your device or a quick online search.\n\nHowever, I'm here to help you bridge the gap to your Mobile Developer dreams!\n\n**What I can assist you with right now is:**\n\n*   **DSA Guidance:** Tackling algorithms and data structures relevant to mobile development.\n*   **Interview Preparation:** Strategies for technical and behavioral rounds, especially for Flutter, Kotlin, or Swift roles.\n*   **Career Advice:** Optimizing your resume, building your portfolio, or understanding industry trends.\n\n**Is there anything related to your Mobile Developer journey that I can help you with?** Let's make every moment count towards your career goals!"
+    },
+    {
+      "role": "user",
+      "content": "what is todays date"
+    },
+    {
+      "role": "assistant",
+      "content": "Hello srimanrao1309! 👋\n\nAs an AI, I don't have access to real-time information like the current date. You can easily find today's date on your device or by a quick online search.\n\nHowever, I'm here to help you achieve your goals as a Mobile Developer!\n\n**How can I assist you right now with your career, DSA, or interview preparation for roles leveraging your skills in Flutter, Kotlin, Swift, Git, REST APIs, and JavaScript?**\n\nLet's make progress on your journey!"
     }
   ]
 }
