@@ -43,25 +43,31 @@ export default function LearningPage() {
     setTestState({ ...testState, submitted: true });
   };
 
-  // Sort modules based on personalized needs
-  const sortedModules = [...MODULES].sort((a, b) => {
+  // Filter to ONLY modules required for the user's target role.
+  // If no role is selected, show all modules.
+  const requiredSkillNames = profile.targetRole
+    ? ROLE_REQUIREMENTS[profile.targetRole].map((r: RoleRequirement) => r.skill)
+    : null;
+
+  const relevantModules = requiredSkillNames
+    ? MODULES.filter(m => requiredSkillNames.includes(m.skill))
+    : MODULES;
+
+  // Sort: missing gaps first, then already-owned required, then others
+  const sortedModules = [...relevantModules].sort((a, b) => {
     const aReq = profile.targetRole && ROLE_REQUIREMENTS[profile.targetRole]?.some((r: RoleRequirement) => r.skill === a.skill);
     const bReq = profile.targetRole && ROLE_REQUIREMENTS[profile.targetRole]?.some((r: RoleRequirement) => r.skill === b.skill);
     const aHas = profile.skills.some(s => s.skill === a.skill);
     const bHas = profile.skills.some(s => s.skill === b.skill);
-    
-    // 1. Missing required skills first (The "Gaps")
+
+    // 1. Missing required skills first (the gaps)
     if (aReq && !aHas && (!bReq || bHas)) return -1;
     if (bReq && !bHas && (!aReq || aHas)) return 1;
-    
+
     // 2. Already owned required skills next
     if (aReq && aHas && (!bReq || !bHas)) return -1;
     if (bReq && bHas && (!aReq || !aHas)) return 1;
-    
-    // 3. Skills you have but aren't required
-    if (aHas && !bHas) return 1;
-    if (bHas && !aHas) return -1;
-    
+
     return 0;
   });
 
