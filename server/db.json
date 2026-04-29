@@ -1,10 +1,10 @@
 {
   "profile": {
-    "name": "srimanrao1309",
+    "name": "MochiNikhil",
     "email": "srimanrao1309@gmail.com",
     "college": "",
     "year": "",
-    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=sriman25",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=MochiNikhil",
     "targetRole": "Mobile Developer",
     "skills": [
       {
@@ -37,24 +37,24 @@
   "codingStats": [
     {
       "platform": "leetcode",
-      "username": "sriman25",
-      "easy": 10,
-      "medium": 9,
+      "username": "MochiNikhil",
+      "easy": 5,
+      "medium": 1,
       "hard": 0,
-      "contestRating": 4209936,
-      "streakDays": 11,
+      "contestRating": 5000001,
+      "streakDays": 26,
       "weeklyActivity": [
-        3,
         0,
-        4,
-        2,
+        1,
         0,
-        5,
-        2
+        0,
+        0,
+        0,
+        1
       ],
-      "realName": "sriman25",
-      "userAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=sriman25",
-      "total": 19
+      "realName": "MochiNikhil",
+      "userAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=MochiNikhil",
+      "total": 6
     },
     {
       "platform": "hackerrank",

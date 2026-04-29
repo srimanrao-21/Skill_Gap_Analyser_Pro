@@ -5,9 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Brain, Mail, Lock, User, Eye, EyeOff, Sparkles } from "lucide-react";
 
-export default function AuthPage() {
+interface AuthPageProps {
+  initialMode?: "login" | "register";
+  onBack?: () => void;
+}
+
+export default function AuthPage({ initialMode = "login", onBack }: AuthPageProps) {
   const { login } = useApp();
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const [mode, setMode] = useState<"login" | "register">(initialMode);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -46,6 +51,15 @@ export default function AuthPage() {
       <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full bg-gradient-to-br from-green-400/20 to-blue-500/20 blur-3xl translate-x-1/2 translate-y-1/2" />
 
       <div className="relative z-10 w-full max-w-md mx-4 animate-scale-in">
+        {/* Back to landing */}
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="mb-4 flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            ← Back to home
+          </button>
+        )}
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-4">
@@ -159,7 +173,7 @@ export default function AuthPage() {
         </div>
 
         <p className="text-center text-xs text-muted-foreground mt-4">
-          Built to help IT students become placement-ready 🚀
+          Built to help students become placement-ready 🚀
         </p>
       </div>
     </div>
