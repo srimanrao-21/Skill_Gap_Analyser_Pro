@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Brain, Sparkles, Target, TrendingUp, BookOpen, Award, CheckCircle } from "lucide-react";
+import { Brain, Target, TrendingUp, BookOpen, Award } from "lucide-react";
 
 interface LandingPageProps {
   onSignIn: () => void;
@@ -16,11 +16,7 @@ export default function LandingPage({ onSignIn, onSignUp }: LandingPageProps) {
     { icon: Award, title: "Resume Builder", desc: "Generate ATS-friendly resumes that get you noticed" },
   ];
 
-  const stats = [
-    { num: "95%", label: "Placement Rate" },
-    { num: "2K+", label: "Students Helped" },
-    { num: "50+", label: "Skill Modules" },
-  ];
+
 
   return (
     <div className="lp-root">
@@ -45,10 +41,7 @@ export default function LandingPage({ onSignIn, onSignUp }: LandingPageProps) {
       <section className="lp-hero">
         {/* Left text */}
         <div className="lp-hero-left">
-          <div className="lp-badge">
-            <Sparkles size={13} />
-            <span>AI-Powered Placement Platform</span>
-          </div>
+
 
           <h1 className="lp-h1">
             Anything's possible<br />
@@ -72,25 +65,13 @@ export default function LandingPage({ onSignIn, onSignUp }: LandingPageProps) {
             </div>
           </div>
 
-          {/* Stats row */}
-          <div className="lp-stats-row">
-            {stats.map((s, i) => (
-              <div key={i} className="lp-stat">
-                <span className="lp-stat-num">{s.num}</span>
-                <span className="lp-stat-label">{s.label}</span>
-              </div>
-            ))}
-          </div>
+
         </div>
 
         {/* Right image */}
         <div className="lp-hero-right">
           <img src="/hero.png" alt="Professionals reviewing skill analysis" className="lp-hero-img" />
-          {/* Floating card */}
-          <div className="lp-float-card">
-            <CheckCircle size={16} color="#f97316" />
-            <span>Skill gap identified! 3 modules recommended.</span>
-          </div>
+
         </div>
       </section>
 

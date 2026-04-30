@@ -1,8 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useApp } from "@/context/AppContext";
 import { analyzeSkillGap, ALL_SKILLS } from "@/data/skillData";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import {
   Download, User, Mail, Code2, Trophy, Star,
   Briefcase, GraduationCap, CheckCircle2, Zap
@@ -18,6 +20,7 @@ export default function ResumeGeneratorPage() {
   const { profile, moduleProgress, codingStats } = useApp();
   const [selectedTemplate, setSelectedTemplate] = useState("modern");
   const [downloading, setDownloading] = useState(false);
+  const resumeRef = useRef<HTMLDivElement>(null);
 
   const skillAnalysis = useMemo(() => {
     if (!profile.targetRole || !profile.skills.length) return null;
@@ -29,8 +32,17 @@ export default function ResumeGeneratorPage() {
   const template = TEMPLATES.find((t) => t.id === selectedTemplate)!;
 
   const handleDownload = async () => {
+    if (!resumeRef.current) return;
     setDownloading(true);
-    await new Promise((r) => setTimeout(r, 1500));
+    try {
+      const canvas = await html2canvas(resumeRef.current, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({ orientation: "portrait", unit: "px", format: [canvas.width / 2, canvas.height / 2] });
+      pdf.addImage(imgData, "PNG", 0, 0, canvas.width / 2, canvas.height / 2);
+      pdf.save(`Resume_${(profile.name || "Student").replace(/\s+/g, "_")}.pdf`);
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+    }
     setDownloading(false);
   };
 
@@ -76,7 +88,7 @@ export default function ResumeGeneratorPage() {
       </div>
 
       {/* Resume preview */}
-      <div className="glass-card rounded-2xl overflow-hidden shadow-hover">
+      <div ref={resumeRef} className="glass-card rounded-2xl overflow-hidden shadow-hover">
         {/* Header band */}
         <div className={`bg-gradient-to-r ${template.color} p-8 text-white`}>
           <div className="flex items-start gap-6">

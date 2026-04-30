@@ -2,15 +2,17 @@ import { useState, useRef } from "react";
 import { useApp } from "@/context/AppContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import html2canvas from "html2canvas";
 import {
-  Trophy, Download, Share2, Star, QrCode,
-  CheckCircle2, Calendar, User, Target
+  Trophy, Download, Share2, Star,
+  CheckCircle2, Calendar, GraduationCap, User, Target
 } from "lucide-react";
 
 interface Certificate {
   id: string;
   type: "module" | "completion";
   studentName: string;
+  college: string;
   skillName: string;
   score: number;
   date: string;
@@ -34,27 +36,57 @@ function CertCard({ cert }: { cert: Certificate }) {
   const isCompletion = cert.type === "completion";
 
   return (
-    <div className={`relative rounded-3xl overflow-hidden shadow-hover ${isCompletion ? "p-0.5 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500" : "p-0.5 bg-gradient-to-br from-blue-500 to-purple-600"}`}>
-      <div className={`rounded-3xl p-6 ${isCompletion ? "bg-gradient-to-br from-yellow-50 to-orange-50" : "bg-gradient-to-br from-blue-50 to-purple-50"}`}>
+    <div className={`relative rounded-3xl overflow-hidden shadow-hover ${
+      isCompletion
+        ? "p-0.5 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500"
+        : "p-0.5 bg-gradient-to-br from-blue-500 to-purple-600"
+    }`}>
+      <div className={`rounded-3xl p-6 ${
+        isCompletion
+          ? "bg-gradient-to-br from-yellow-50 to-orange-50"
+          : "bg-gradient-to-br from-blue-50 to-purple-50"
+      }`}>
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              {isCompletion ? <Star className="w-5 h-5 text-yellow-500" /> : <Trophy className="w-5 h-5 text-blue-500" />}
+              {isCompletion
+                ? <Star className="w-5 h-5 text-yellow-500" />
+                : <Trophy className="w-5 h-5 text-blue-500" />}
               <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 {isCompletion ? "Completion Certificate" : "Module Certificate"}
               </span>
             </div>
-            <h2 className="text-xl font-display font-black">SkillBridge AI</h2>
+            <h2 className="text-xl font-display font-black">Skill Gap Analyzer</h2>
           </div>
           <QRCodePlaceholder value={cert.uniqueId} />
         </div>
 
         <div className="border-t border-black/10 pt-4 mb-4">
           <p className="text-xs text-muted-foreground mb-1">This certifies that</p>
-          <h3 className="text-2xl font-display font-bold mb-3">{cert.studentName}</h3>
+
+          {/* ── Student Name ── */}
+          <div className="flex items-center gap-2 mb-1">
+            <User className="w-4 h-4 text-blue-500 flex-shrink-0" />
+            <h3 className={`text-2xl font-display font-bold ${
+              isCompletion ? "text-orange-700" : "text-blue-700"
+            }`}>
+              {cert.studentName}
+            </h3>
+          </div>
+
+          {/* ── College Name ── */}
+          {cert.college && (
+            <div className="flex items-center gap-2 mb-3">
+              <GraduationCap className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+              <span className="text-sm text-muted-foreground font-medium">{cert.college}</span>
+            </div>
+          )}
+
           <p className="text-xs text-muted-foreground mb-1">has successfully completed</p>
-          <h4 className={`text-lg font-display font-bold ${isCompletion ? "text-orange-600" : "text-blue-600"}`}>
+          <h4 className={`text-lg font-display font-bold ${
+            isCompletion ? "text-orange-600" : "text-blue-600"
+          }`}>
             {cert.skillName}
           </h4>
           {isCompletion && (
@@ -68,7 +100,9 @@ function CertCard({ cert }: { cert: Certificate }) {
             <span>{cert.date}</span>
           </div>
           <div className="font-mono text-xs opacity-70">{cert.uniqueId}</div>
-          {!isCompletion && <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">Score: {cert.score}%</Badge>}
+          {!isCompletion && (
+            <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">Score: {cert.score}%</Badge>
+          )}
         </div>
       </div>
     </div>
@@ -78,6 +112,7 @@ function CertCard({ cert }: { cert: Certificate }) {
 export default function CertificatesPage() {
   const { profile, moduleProgress } = useApp();
   const [downloaded, setDownloaded] = useState<string | null>(null);
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const passedModules = moduleProgress.filter((m) => m.testPassed);
   const allPassed = passedModules.length >= 3;
@@ -87,6 +122,7 @@ export default function CertificatesPage() {
       id: m.moduleId,
       type: "module" as const,
       studentName: profile.name || "Student",
+      college: profile.college || "",
       skillName: m.moduleId.charAt(0).toUpperCase() + m.moduleId.slice(1),
       score: m.testScore ?? 0,
       date: new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
@@ -96,6 +132,7 @@ export default function CertificatesPage() {
       id: "completion",
       type: "completion" as const,
       studentName: profile.name || "Student",
+      college: profile.college || "",
       skillName: profile.targetRole || "Full Stack Development",
       score: Math.round(passedModules.reduce((acc, m) => acc + (m.testScore ?? 0), 0) / passedModules.length),
       date: new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
@@ -103,9 +140,23 @@ export default function CertificatesPage() {
     }] : []),
   ];
 
-  const handleDownload = (id: string) => {
-    setDownloaded(id);
-    setTimeout(() => setDownloaded(null), 2000);
+  const handleDownload = async (id: string, skillName: string) => {
+    const node = cardRefs.current[id];
+    if (!node) return;
+    try {
+      const canvas = await html2canvas(node, { scale: 2, useCORS: true, backgroundColor: null });
+      const blob = await new Promise<Blob>((res) => canvas.toBlob((b) => res(b!), "image/png"));
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Certificate_${skillName.replace(/\s+/g, "_")}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setDownloaded(id);
+      setTimeout(() => setDownloaded(null), 2500);
+    } catch (err) {
+      console.error("Download failed:", err);
+    }
   };
 
   return (
@@ -149,12 +200,14 @@ export default function CertificatesPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {certs.map((cert) => (
             <div key={cert.id} className="space-y-3">
-              <CertCard cert={cert} />
+              <div ref={(el) => { cardRefs.current[cert.id] = el; }}>
+                <CertCard cert={cert} />
+              </div>
               <div className="flex gap-2">
-                <Button onClick={() => handleDownload(cert.id)}
+                <Button onClick={() => handleDownload(cert.id, cert.skillName)}
                   className={`flex-1 rounded-xl gap-2 text-sm ${cert.type === "completion" ? "btn-gradient-warning" : "btn-gradient-primary"}`}>
                   {downloaded === cert.id ? <CheckCircle2 className="w-4 h-4" /> : <Download className="w-4 h-4" />}
-                  {downloaded === cert.id ? "Downloaded!" : "Download PDF"}
+                  {downloaded === cert.id ? "Downloaded!" : "Download PNG"}
                 </Button>
                 <Button variant="outline" className="rounded-xl gap-2 text-sm">
                   <Share2 className="w-4 h-4" /> Share
