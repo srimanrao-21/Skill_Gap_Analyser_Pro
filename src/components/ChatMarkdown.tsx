@@ -1,13 +1,4 @@
 import React from "react";
-
-/**
- * Lightweight markdown renderer for AI chat messages.
- * Supports: **bold**, bullet points (• and -), numbered lists,
- * headings (##), tables, inline code, and line breaks.
- * No external dependencies required.
- */
-
-
 function renderInline(text: string): React.ReactNode[] {
   const parts: React.ReactNode[] = [];
   // Match **bold**, `code`, and plain text segments
